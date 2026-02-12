@@ -1,6 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth'; // On importe le cerveau
 
 const Login = () => {
+    // --- LOGIQUE ---
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            await login(email, password);
+            // Si ça réussit, on va vers le planning
+            navigate('/planning');
+        } catch (err: any) {
+            // Si ça rate (ex: mauvais mot de passe ou serveur éteint)
+            setError(err.message || 'Erreur de connexion au serveur');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --- RENDU ---
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -17,11 +46,22 @@ const Login = () => {
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow-xl shadow-slate-200/50 sm:rounded-xl sm:px-10 border border-slate-100">
-                    <form className="space-y-6">
+                    
+                    {/* Affichage de l'erreur si elle existe */}
+                    {error && (
+                        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
+                            {error}
+                        </div>
+                    )}
+
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label className="block text-sm font-medium text-slate-700">Email professionnel</label>
                             <input
                                 type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="prenom.nom@techspace.com"
                                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none transition-all"
                             />
@@ -31,13 +71,20 @@ const Login = () => {
                             <label className="block text-sm font-medium text-slate-700">Mot de passe</label>
                             <input
                                 type="password"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm outline-none transition-all"
                             />
                         </div>
 
-                        <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                            Se connecter
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {loading ? 'Connexion en cours...' : 'Se connecter'}
                         </button>
                     </form>
 

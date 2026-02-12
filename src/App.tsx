@@ -1,18 +1,25 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// src/App.tsx
+import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Planning from './pages/Planning';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* L'adresse par défaut (http://localhost:5173/) affiche le Login */}
-        <Route path="/" element={<Login />} />
+    <Routes>
+      {/* Route publique : Le Login */}
+      <Route path="/" element={<Login />} />
 
-        {/* L'adresse /planning affichera notre futur calendrier */}
-        <Route path="/planning" element={<Planning />} />
-      </Routes>
-    </Router>
+      {/* Route protégée : Le Planning */}
+      <Route 
+        path="/planning" 
+        element={
+          <PrivateRoute>
+            <Planning />
+          </PrivateRoute>
+        } 
+      />
+    </Routes>
   );
 }
 
